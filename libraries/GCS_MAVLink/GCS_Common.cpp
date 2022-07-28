@@ -900,6 +900,7 @@ ap_message GCS_MAVLINK::mavlink_id_to_ap_message_id(const uint32_t mavlink_id) c
         { MAVLINK_MSG_ID_GPS_GLOBAL_ORIGIN,     MSG_ORIGIN},
         { MAVLINK_MSG_ID_SYS_STATUS,            MSG_SYS_STATUS},
         { MAVLINK_MSG_ID_POWER_STATUS,          MSG_POWER_STATUS},
+        { MAVLINK_MSG_ID_EXT_FC,                MSG_EXT_FC },
 #if HAL_WITH_MCU_MONITORING
         { MAVLINK_MSG_ID_MCU_STATUS,            MSG_MCU_STATUS},
 #endif
@@ -5636,6 +5637,7 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
         }
 #endif
         break;
+        
     }
 
 
@@ -5645,6 +5647,11 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
         send_uavionix_adsb_out_status();
 #endif
         break;
+        
+    case MSG_EXT_FC:
+    	CHECK_PAYLOAD_SIZE(EXT_FC);
+    	send_ext_fc();
+    	break;
 
     default:
         // try_send_message must always at some stage return true for
@@ -6321,3 +6328,12 @@ MAV_RESULT GCS_MAVLINK::handle_control_high_latency(const mavlink_command_long_t
     return MAV_RESULT_ACCEPTED;
 }
 #endif // HAL_HIGH_LATENCY2_ENABLED
+
+
+void GCS_MAVLINK::send_ext_fc() const
+{
+
+
+    mavlink_msg_ext_fc_send( chan , AP_HAL::millis(),0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+// so far I have added the switch case, this function, and the 2 size matrix for msg Id pair to full name ^^^{Mav_MSG_ID_EXT_FC, EXT_FC}
+}
