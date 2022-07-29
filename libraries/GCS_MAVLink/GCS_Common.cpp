@@ -6345,8 +6345,42 @@ MAV_RESULT GCS_MAVLINK::handle_control_high_latency(const mavlink_command_long_t
 
 void GCS_MAVLINK::send_ext_fc() const
 {
+    
+#if HAL_INS_ENABLED
+    const AP_InertialSensor &ins = AP::ins();
 
+    Vector3f accel{};
+    if (ins.get_accel_count() > 0) {
+        accel = ins.get_accel(0);
+    }
+#endif
 
-    mavlink_msg_ext_fc_send( chan , AP_HAL::millis(),0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+    const AP_AHRS &ahrs = AP::ahrs();
+    const Vector3f omega = ahrs.get_gyro();
+  
+    uint16_t values[18] = {};
+    rc().get_radio_in(values, ARRAY_SIZE(values));
+
+    mavlink_msg_ext_fc_send(
+        chan ,
+        AP_HAL::millis(),
+        ahrs.roll,
+        ahrs.pitch,
+        ahrs.yaw,
+        omega.x,
+        omega.y,
+        omega.z,
+        values[0],
+        values[1],
+        values[2],
+        values[3],
+        values[4],
+        values[5],
+        values[6],
+        values[7],
+        accel.x * 1000.0f / GRAVITY_MSS,
+        accel.y * 1000.0f / GRAVITY_MSS,
+        accel.z * 1000.0f / GRAVITY_MSS
+        );
 // so far I have added the switch case, this function, and the 2 size matrix for msg Id pair to full name ^^^{Mav_MSG_ID_EXT_FC, EXT_FC}
 }
