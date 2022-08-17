@@ -6378,6 +6378,7 @@ void GCS_MAVLINK::send_ext_fc() const
         values[5],
         values[6],
         values[7],
+        values[8],
         accel.x * 1000.0f / GRAVITY_MSS,
         accel.y * 1000.0f / GRAVITY_MSS,
         accel.z * 1000.0f / GRAVITY_MSS
