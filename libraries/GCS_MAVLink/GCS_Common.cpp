@@ -6355,11 +6355,17 @@ void GCS_MAVLINK::send_ext_fc() const
     }
 #endif
 
-    const AP_AHRS &ahrs = AP::ahrs();
+    AP_AHRS &ahrs = AP::ahrs();
     const Vector3f omega = ahrs.get_gyro();
   
     uint16_t values[18] = {};
     rc().get_radio_in(values, ARRAY_SIZE(values));
+
+
+    Vector3f vel;
+    if (!ahrs.get_velocity_NED(vel)) {
+        vel.zero();
+    }
 
     mavlink_msg_ext_fc_send(
         chan ,
@@ -6381,7 +6387,14 @@ void GCS_MAVLINK::send_ext_fc() const
         values[8],
         accel.x * 1000.0f / GRAVITY_MSS,
         accel.y * 1000.0f / GRAVITY_MSS,
-        accel.z * 1000.0f / GRAVITY_MSS
+        accel.z * 1000.0f / GRAVITY_MSS,
+        global_position_current_loc.lat, // in 1E7 degrees
+        global_position_current_loc.lng, // in 1E7 degrees
+        global_position_int_relative_alt(), // millimeters above home
+        vel.x * 100,                     // X speed cm/s (+ve North)
+        vel.y * 100,                     // Y speed cm/s (+ve East)
+        vel.z * 100,                     // Z speed cm/s (+ve Down)
+        ahrs.yaw_sensor                  // compass heading in 1/100 degree
         );
 // so far I have added the switch case, this function, and the 2 size matrix for msg Id pair to full name ^^^{Mav_MSG_ID_EXT_FC, EXT_FC}
 }
