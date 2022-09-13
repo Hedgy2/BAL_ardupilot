@@ -6343,7 +6343,7 @@ MAV_RESULT GCS_MAVLINK::handle_control_high_latency(const mavlink_command_long_t
 #endif // HAL_HIGH_LATENCY2_ENABLED
 
 
-void GCS_MAVLINK::send_ext_fc() const
+void GCS_MAVLINK::send_ext_fc()
 {
     
 #if HAL_INS_ENABLED
@@ -6361,7 +6361,8 @@ void GCS_MAVLINK::send_ext_fc() const
     uint16_t values[18] = {};
     rc().get_radio_in(values, ARRAY_SIZE(values));
 
-
+    ahrs.get_location(global_position_current_loc); // return value ignored; we send stale data
+    
     Vector3f vel;
     if (!ahrs.get_velocity_NED(vel)) {
         vel.zero();
